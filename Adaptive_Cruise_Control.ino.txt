@@ -1,0 +1,55 @@
+// Adaptive Cruise Control (ACC)
+// Components: Arduino UNO, Ultrasonic Sensor, DC Motor with Driver (L298N)
+
+#define TRIG 9
+#define ECHO 10
+#define ENA 5
+#define IN1 6
+#define IN2 7
+
+long duration;
+int distance;
+int motorSpeed;
+
+void setup() {
+  pinMode(TRIG, OUTPUT);
+  pinMode(ECHO, INPUT);
+  pinMode(ENA, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+
+  Serial.begin(9600);
+}
+
+void loop() {
+  // Send ultrasonic pulse
+  digitalWrite(TRIG, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG, LOW);
+
+  // Measure echo time
+  duration = pulseIn(ECHO, HIGH);
+  distance = duration * 0.034 / 2;
+
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  // Cruise control logic
+  if (distance < 20) {
+    motorSpeed = 0; // Stop if too close
+  } else if (distance < 40) {
+    motorSpeed = 100; // Slow speed
+  } else {
+    motorSpeed = 200; // Normal speed
+  }
+
+  // Drive motor
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  analogWrite(ENA, motorSpeed);
+
+  delay(300);
+}
